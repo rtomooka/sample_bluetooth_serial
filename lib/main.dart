@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Bluetooth Serial Demo'),
     );
   }
 }
@@ -29,6 +29,7 @@ class MyHomePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final bluetoothEnable = useState(false);
+    final bondedDevices = useState([]);
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -37,8 +38,8 @@ class MyHomePage extends HookWidget {
         children: [
           Card(
             child: ListTile(
-              title: Text("BlueTooth ${bluetoothEnable.value}"),
-              leading: ElevatedButton(
+              title: const Text("BlueTooth Enable"),
+              trailing: ElevatedButton(
                 onPressed: () async {
                   if (bluetoothEnable.value) return;
                   await FlutterBluetoothSerial.instance.requestEnable();
@@ -47,12 +48,66 @@ class MyHomePage extends HookWidget {
                     bluetoothEnable.value = true;
                   }
                 },
-                child: Icon(Icons.bluetooth),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: bluetoothEnable.value
+                      ? Theme.of(context).primaryColor
+                      : Colors.redAccent,
+                ),
+                child: const Icon(Icons.bluetooth),
               ),
-              trailing: bluetoothEnable.value
-                  ? Icon(Icons.check_box_outlined)
-                  : Icon(Icons.check_box_outline_blank_outlined),
             ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text("Bluetooth Status"),
+              trailing: ElevatedButton(
+                onPressed: () async {
+                  await FlutterBluetoothSerial.instance.openSettings();
+                },
+                child: const Icon(Icons.settings_outlined),
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text("Bonded Devices"),
+              trailing: ElevatedButton(
+                onPressed: () async {
+                  bondedDevices.value =
+                      await FlutterBluetoothSerial.instance.getBondedDevices();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: bondedDevices.value.isNotEmpty
+                      ? Theme.of(context).primaryColor
+                      : Colors.redAccent,
+                ),
+                child: const Icon(Icons.devices),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text("Bonded Devices"),
+          ),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: bondedDevices.value.length,
+            itemBuilder: (context, int index) {
+              BluetoothDevice device = bondedDevices.value.elementAt(index);
+              return Card(
+                child: ExpansionTile(
+                  title: Text(device.name ?? ""),
+                  subtitle: Text(device.address),
+                  expandedAlignment: Alignment.centerLeft,
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("bondState : ${device.bondState.stringValue}"),
+                    Text("isBonded : ${device.isBonded}"),
+                    Text("isConnected : ${device.isConnected}"),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
