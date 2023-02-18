@@ -1,8 +1,8 @@
 <!-- omit in toc -->
 # sample_bluetooth_serial
 
-Bluetoothシリアル通信をFlutterで実験する
-↓ 実際の様子
+Bluetoothシリアル通信をFlutterで実験する  
+↓ 実際の様子  
 [Arduino Mega + HC-05 を Flutterアプリで操作する](https://www.youtube.com/watch?v=yJxWfYq5G0o)
 
 ## 1. 構成
